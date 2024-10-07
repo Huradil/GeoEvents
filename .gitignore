@@ -1,6 +1,7 @@
 *.iml
 .gradle
 /local.properties
+/app/google-services.json
 /secrets.properties
 /local.defaults.properties
 /.idea/caches
@@ -17,3 +18,4 @@
 local.properties
 secrets.properties
 local.defaults.properties
+app/google-services.json
