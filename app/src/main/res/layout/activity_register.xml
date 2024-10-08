@@ -17,32 +17,38 @@
             android:layout_gravity="center">
 
             <EditText
-                android:id="@+id/usernameOrEmailField"
+                android:id="@+id/usernameField"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Имя пользователя или Email" />
+                android:hint="Имя пользователя" />
+
+            <EditText
+                android:id="@+id/emailField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Email"
+                android:inputType="textEmailAddress"
+                android:layout_marginBottom="16dp" />
 
             <EditText
                 android:id="@+id/passwordField"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Пароль"
+                android:inputType="textPassword"
+                android:layout_marginBottom="16dp" />
+            <EditText
+                android:id="@+id/confirmPasswordField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Подтверждение пароля"
                 android:inputType="textPassword" />
 
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Войти"
-                android:onClick="loginUser"
-                android:layout_marginBottom="16dp" />
-
-            <TextView
-                android:id="@+id/registerLink"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Еще нет аккаунта? Регистрация"
-                android:textColor="@android:color/holo_blue_light"
-                android:paddingTop="16dp" />
+                android:text="Регистрация"
+                android:onClick="registerUser" />
 
         </LinearLayout>
 
