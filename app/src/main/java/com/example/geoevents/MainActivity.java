@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.example.geoevents.database.Event;
 import com.example.geoevents.database.EventManager;
+import com.example.geoevents.manage.MarkerManager;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private FirebaseAuth mAuth;
     private GoogleMap mMap;
+    private MarkerManager markerManager;
     private EventManager eventManager;
     private FusedLocationProviderClient fusedLocationClient;
     private final int LOCATION_PERMISSION_REQUEST_CODE = 1;
@@ -61,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        markerManager = new MarkerManager(mMap, this);
 
         mMap.setOnMapLongClickListener(latLng -> showAddEventDialog(latLng));
 
@@ -134,6 +137,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Spinner prioritySpinner = view.findViewById(R.id.eventPrioritySpinner);
         EditText dateInput = view.findViewById(R.id.eventDate);
         EditText timeInput = view.findViewById(R.id.eventTime);
+        EditText endDateTimeInput = view.findViewById(R.id.eventEndDateTime);
 
         // current date and time
         Calendar calendar = Calendar.getInstance();
@@ -173,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             );
             timePickerDialog.show();
         });
+        endDateTimeInput.setOnClickListener(v -> showDateTimePicker(endDateTimeInput));
 
         builder.setView(view);
 
@@ -182,14 +187,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             String selectedPriority = prioritySpinner.getSelectedItem().toString();
             String eventDate = dateInput.getText().toString();
             String eventTime = timeInput.getText().toString();
+            String endDateTime = endDateTimeInput.getText().toString();
 
             eventManager.addEvent(title, description, latLng, selectedPriority, eventDate,
-                    eventTime, new EventManager.OnEventAddedListener() {
+                    eventTime, endDateTime, new EventManager.OnEventAddedListener() {
                 @Override
                 public void onEventAdded(Event event) {
                     Toast.makeText(MainActivity.this, "Событие добавлено", Toast.LENGTH_SHORT).show();
 
-                    mMap.addMarker(new MarkerOptions().position(latLng).title(event.getTitle()));
+                    //mMap.addMarker(new MarkerOptions().position(latLng).title(event.getTitle()));
+                    markerManager.addMarkerWithPriority(latLng, event.getTitle(), event.getPriority() );
                 }
 
                 @Override
@@ -203,5 +210,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         builder.show();
 
 
+    }
+
+    private void showDateTimePicker(EditText endDateTimeInput) {
+        // Текущая дата
+        final Calendar currentDate = Calendar.getInstance();
+        final Calendar date = Calendar.getInstance();
+
+        new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
+            date.set(year, month, dayOfMonth);
+            new TimePickerDialog(this, (timeView, hourOfDay, minute) -> {
+                date.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                date.set(Calendar.MINUTE, minute);
+
+                // Устанавливаем выбранную дату и время в поле
+                SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+                endDateTimeInput.setText(dateTimeFormat.format(date.getTime()));
+
+            }, currentDate.get(Calendar.HOUR_OF_DAY), currentDate.get(Calendar.MINUTE), true).show();
+        }, currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DAY_OF_MONTH)).show();
     }
 }

@@ -10,13 +10,14 @@ public class Event {
     private String priority;
     private String date;
     private String time;
+    private String endDateTime;
 
     public Event() {
 
     }
 
     public Event(String title, String description, double latitude, double longitude, String priority,
-                 String date, String time) {
+                 String date, String time, String endDateTime) {
         this.title = title;
         this.description = description;
         this.latitude = latitude;
@@ -24,6 +25,7 @@ public class Event {
         this.priority = priority;
         this.date = date;
         this.time = time;
+        this.endDateTime = endDateTime;
     }
 
     public double getLatitude() {
@@ -47,6 +49,7 @@ public class Event {
     }
     public String getDate() {return date;}
     public String getTime() {return time;}
+    public String getEndDateTime() {return endDateTime;}
 
     public void setDescription(String description) {
         this.description = description;
@@ -69,4 +72,10 @@ public class Event {
     }
     public void setDate(String date) {this.date = date;}
     public void setTime(String time) {this.time = time;}
+    public void setEndDateTime(String endDateTime) {
+        this.endDateTime = endDateTime;
+    }
+    public boolean hasEndDateTime() {
+        return endDateTime != null && !endDateTime.isEmpty();
+    }
 }
