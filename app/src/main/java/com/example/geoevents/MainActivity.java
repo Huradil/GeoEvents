@@ -14,6 +14,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.geoevents.database.Event;
+import com.example.geoevents.database.EventManager;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -29,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private FirebaseAuth mAuth;
     private GoogleMap mMap;
+    private EventManager eventManager;
     private FusedLocationProviderClient fusedLocationClient;
     private final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
@@ -39,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Инициализация Auth
         mAuth = FirebaseAuth.getInstance();
+        eventManager = new EventManager();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -128,19 +132,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             String description = descriptionInput.getText().toString();
             String priority = priorityInput.getText().toString();
 
-//            eventManager.addEvent(title, description, latLng, priority, new EventManager.OnEventAddedListener() {
-//                @Override
-//                public void onEventAdded(Event event) {
-//                    Toast.makeText(MainActivity.this, "Событие добавлено", Toast.LENGTH_SHORT).show();
-//                    // Добавьте маркер на карту
-//                    mMap.addMarker(new MarkerOptions().position(latLng).title(event.getTitle()));
-//                }
-//
-//                @Override
-//                public void onEventAddFailed() {
-//                    Toast.makeText(MainActivity.this, "Ошибка при добавлении события", Toast.LENGTH_SHORT).show();
-//                }
-//            });
+            eventManager.addEvent(title, description, latLng, priority, new EventManager.OnEventAddedListener() {
+                @Override
+                public void onEventAdded(Event event) {
+                    Toast.makeText(MainActivity.this, "Событие добавлено", Toast.LENGTH_SHORT).show();
+
+                    mMap.addMarker(new MarkerOptions().position(latLng).title(event.getTitle()));
+                }
+
+                @Override
+                public void onEventAddFailed() {
+                    Toast.makeText(MainActivity.this, "Ошибка при добавлении события", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
         builder.setNegativeButton("Отмена", (dialog, which) -> dialog.dismiss());
