@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">GeoEvents</string>
+    <string-array name="event_priorities">
+        <item>Низкий</item>
+        <item>Средний</item>
+        <item>Высокий</item>
+    </string-array>
 </resources>

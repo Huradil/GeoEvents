@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.geoevents.database.Event;
@@ -124,15 +125,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         View view = getLayoutInflater().inflate(R.layout.dialog_add_event, null);
         EditText titleInput = view.findViewById(R.id.eventTitle);
         EditText descriptionInput = view.findViewById(R.id.eventDescription);
-        EditText priorityInput = view.findViewById(R.id.eventPriority);
+        Spinner prioritySpinner = view.findViewById(R.id.eventPrioritySpinner);
         builder.setView(view);
 
         builder.setPositiveButton("Добавить", (dialog, which) -> {
             String title = titleInput.getText().toString();
             String description = descriptionInput.getText().toString();
-            String priority = priorityInput.getText().toString();
+            String selectedPriority = prioritySpinner.getSelectedItem().toString();
 
-            eventManager.addEvent(title, description, latLng, priority, new EventManager.OnEventAddedListener() {
+            eventManager.addEvent(title, description, latLng, selectedPriority, new EventManager.OnEventAddedListener() {
                 @Override
                 public void onEventAdded(Event event) {
                     Toast.makeText(MainActivity.this, "Событие добавлено", Toast.LENGTH_SHORT).show();

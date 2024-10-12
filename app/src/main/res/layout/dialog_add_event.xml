@@ -17,9 +17,9 @@
         android:layout_height="wrap_content"
         android:hint="Описание" />
 
-    <EditText
-        android:id="@+id/eventPriority"
+    <Spinner
+        android:id="@+id/eventPrioritySpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Приоритет (опционально)" />
+        android:entries="@array/event_priorities" />
 </LinearLayout>
