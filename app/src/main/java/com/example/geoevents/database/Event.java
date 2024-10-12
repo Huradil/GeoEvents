@@ -1,22 +1,29 @@
 package com.example.geoevents.database;
 
+import java.util.SplittableRandom;
+
 public class Event {
     private String title;
     private String description;
     private double latitude;
     private double longitude;
     private String priority;
+    private String date;
+    private String time;
 
     public Event() {
 
     }
 
-    public Event(String title, String description, double latitude, double longitude, String priority) {
+    public Event(String title, String description, double latitude, double longitude, String priority,
+                 String date, String time) {
         this.title = title;
         this.description = description;
         this.latitude = latitude;
         this.longitude = longitude;
         this.priority = priority;
+        this.date = date;
+        this.time = time;
     }
 
     public double getLatitude() {
@@ -38,6 +45,8 @@ public class Event {
     public String getTitle() {
         return title;
     }
+    public String getDate() {return date;}
+    public String getTime() {return time;}
 
     public void setDescription(String description) {
         this.description = description;
@@ -58,4 +67,6 @@ public class Event {
     public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
+    public void setDate(String date) {this.date = date;}
+    public void setTime(String time) {this.time = time;}
 }

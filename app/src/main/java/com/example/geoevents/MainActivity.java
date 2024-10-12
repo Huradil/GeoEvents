@@ -7,6 +7,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -27,6 +29,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -126,14 +132,59 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         EditText titleInput = view.findViewById(R.id.eventTitle);
         EditText descriptionInput = view.findViewById(R.id.eventDescription);
         Spinner prioritySpinner = view.findViewById(R.id.eventPrioritySpinner);
+        EditText dateInput = view.findViewById(R.id.eventDate);
+        EditText timeInput = view.findViewById(R.id.eventTime);
+
+        // current date and time
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+
+        dateInput.setText(dateFormat.format(calendar.getTime()));
+        timeInput.setText(timeFormat.format(calendar.getTime()));
+
+        // DatePicker
+        dateInput.setOnClickListener(v -> {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    MainActivity.this, (view1, year, month, dayOfMonth) -> {
+                        calendar.set(Calendar.YEAR, year);
+                        calendar.set(Calendar.MONTH, month);
+                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        dateInput.setText(dateFormat.format(calendar.getTime()));
+            },
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH)
+            );
+            datePickerDialog.show();
+        });
+
+        // TimePicker
+        timeInput.setOnClickListener(v -> {
+            TimePickerDialog timePickerDialog = new TimePickerDialog(
+                    MainActivity.this, (view12, hourOfDay, minute) -> {
+                        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                        calendar.set(Calendar.MINUTE, minute);
+                        timeInput.setText(timeFormat.format(calendar.getTime()));
+            },
+                    calendar.get(Calendar.HOUR_OF_DAY),
+                    calendar.get(Calendar.MINUTE),
+                    true
+            );
+            timePickerDialog.show();
+        });
+
         builder.setView(view);
 
         builder.setPositiveButton("Добавить", (dialog, which) -> {
             String title = titleInput.getText().toString();
             String description = descriptionInput.getText().toString();
             String selectedPriority = prioritySpinner.getSelectedItem().toString();
+            String eventDate = dateInput.getText().toString();
+            String eventTime = timeInput.getText().toString();
 
-            eventManager.addEvent(title, description, latLng, selectedPriority, new EventManager.OnEventAddedListener() {
+            eventManager.addEvent(title, description, latLng, selectedPriority, eventDate,
+                    eventTime, new EventManager.OnEventAddedListener() {
                 @Override
                 public void onEventAdded(Event event) {
                     Toast.makeText(MainActivity.this, "Событие добавлено", Toast.LENGTH_SHORT).show();

@@ -22,4 +22,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:entries="@array/event_priorities" />
+
+    <EditText
+        android:id="@+id/eventDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Дата события"
+        android:focusable="false" />
+
+    <EditText
+        android:id="@+id/eventTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Время события"
+        android:focusable="false" />
 </LinearLayout>

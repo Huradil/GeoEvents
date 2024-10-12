@@ -11,9 +11,11 @@ public class EventManager {
     }
 
     public void addEvent(String title, String description, LatLng latLng, String priority,
+                         String date, String time,
                          OnEventAddedListener listener) {
         String eventId = eventsRef.push().getKey();
-        Event event = new Event(title, description, latLng.latitude, latLng.longitude, priority);
+        Event event = new Event(title, description, latLng.latitude, latLng.longitude, priority,
+                date, time);
 
         eventsRef.child(eventId).setValue(event).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
