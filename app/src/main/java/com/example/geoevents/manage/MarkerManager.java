@@ -12,6 +12,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MarkerManager {
@@ -23,10 +24,10 @@ public class MarkerManager {
         this.mContext = context;
     }
 
-    public void addMarkerWithPriority(LatLng latLng, String title, String priority) {
+    public Marker addMarkerWithPriority(LatLng latLng, String title, String priority) {
         BitmapDescriptor icon = getMarkerIconByPriority(priority);
 
-        mMap.addMarker(new MarkerOptions()
+        return mMap.addMarker(new MarkerOptions()
                 .position(latLng)
                 .title(title)
                 .icon(icon)

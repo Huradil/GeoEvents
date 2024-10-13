@@ -12,9 +12,13 @@ import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.geoevents.database.Event;
@@ -27,12 +31,14 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -76,6 +82,35 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     LOCATION_PERMISSION_REQUEST_CODE);
         }
+        // get all event on map
+        eventManager.getAllEvents(new EventManager.OnEventsLoadedListener() {
+            @Override
+            public void onEventsLoaded(List<Event> eventList) {
+                for (Event event : eventList) {
+                    LatLng eventLocation = new LatLng(event.getLatitude(), event.getLongitude());
+                    String title = event.getTitle();
+                    String priority = event.getPriority();
+
+                    Marker marker = markerManager.addMarkerWithPriority(eventLocation, title, priority);
+
+                    marker.setTag(event);
+
+                }
+            }
+            @Override
+            public void onDataLoadFailed(Exception e) {
+                Toast.makeText(MainActivity.this, "Ошибка загрузки данных", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mMap.setOnMarkerClickListener(marker -> {
+            Event event = (Event) marker.getTag();
+
+            if (event != null) {
+                showEventDetailsDialog(event);
+            }
+            return true;
+        });
 
     }
 
@@ -229,5 +264,90 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }, currentDate.get(Calendar.HOUR_OF_DAY), currentDate.get(Calendar.MINUTE), true).show();
         }, currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DAY_OF_MONTH)).show();
+    }
+
+    private void showEventDetailsDialog(Event event) {
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.event_details, null);
+        builder.setView(dialogView);
+
+        EditText eventDescription = dialogView.findViewById(R.id.eventDescription);
+        Spinner spinnerPriority = dialogView.findViewById(R.id.eventPriority);
+        EditText eventDateTime = dialogView.findViewById(R.id.eventDateTime);
+        EditText eventEndDateTime = dialogView.findViewById(R.id.eventEndDateTime);
+        Button btnDeleteEvent = dialogView.findViewById(R.id.btnDeleteEvent);
+        Button btnSaveChanges = dialogView.findViewById(R.id.btnSaveChanges);
+
+        eventDescription.setText(event.getDescription());
+        eventDateTime.setText(event.getDate() + " " + event.getTime());
+        eventEndDateTime.setText(event.getEndDateTime());
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.event_priorities,
+                androidx.appcompat.R.layout.support_simple_spinner_dropdown_item); // -> fix may be
+        adapter.setDropDownViewResource(androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
+        spinnerPriority.setAdapter(adapter);
+        int priorityPosition = adapter.getPosition(event.getPriority());
+        spinnerPriority.setSelection(priorityPosition);
+
+        if (!event.getAuthorId().equals(currentUserId)) {
+            eventDescription.setEnabled(false);
+            spinnerPriority.setEnabled(false);
+            eventDateTime.setEnabled(false);
+            eventEndDateTime.setEnabled(false);
+        } else {
+            btnDeleteEvent.setVisibility(View.VISIBLE);
+            btnSaveChanges.setVisibility(View.VISIBLE);
+
+            btnDeleteEvent.setOnClickListener(v -> {
+                new AlertDialog.Builder(this)
+                        .setTitle("Удаление события")
+                        .setMessage("Вы уверены что хотите удалить это событие?")
+                        .setPositiveButton("Удалить", (dialog, which) -> {
+                            eventManager.deleteEvent(event.getId(), new EventManager.OnEventDeletedListener() {
+                                @Override
+                                public void onEventDeleted() {
+                                    Toast.makeText(MainActivity.this, "Событие удалено", Toast.LENGTH_SHORT).show();
+                                    dialog.dismiss();
+                                }
+
+                                @Override
+                                public void onEventDeletedFailed(Exception e) {
+                                    Toast.makeText(MainActivity.this, "Ошбика при удалении", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        })
+                        .setNegativeButton("Отмена", null)
+                        .show();
+            });
+            btnSaveChanges.setOnClickListener(v -> {
+                String newDescription = eventDescription.getText().toString();
+                String newPriority = spinnerPriority.getSelectedItem().toString();
+                String newStartDateTime = eventDateTime.getText().toString();
+                String newEndDateTime = eventEndDateTime.getText().toString();
+
+                event.setDescription(newDescription);
+                event.setPriority(newPriority);
+                event.setDate(newStartDateTime.split(" ")[0]);
+                event.setTime(newStartDateTime.split(" ")[1]);
+                event.setEndDateTime(newEndDateTime);
+
+                eventManager.updateEvent(event, new EventManager.OnEventUpdateListener() {
+                    @Override
+                    public void onEventUpdate() {
+                        Toast.makeText(MainActivity.this, "Событие обновлено", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onEventUpdateFailed(Exception e) {
+                        Toast.makeText(MainActivity.this, "Ошибка при обновлении", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            });
+        }
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }
