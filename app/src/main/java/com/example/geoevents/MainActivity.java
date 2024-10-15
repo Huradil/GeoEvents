@@ -112,6 +112,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             return true;
         });
 
+        // обновление маркеров
+        eventManager.subscribeToEventChanges(new EventManager.OnEventsUpdateListener() {
+            @Override
+            public void onMarkersUpdate() {
+                updateMarkers();
+            }
+            @Override
+            public void onDatabaseLoadFailed(Exception e) {
+                Toast.makeText(MainActivity.this, "Ошибка при загрузке обновлений", Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     private void getCurrentLocation() {
@@ -311,6 +323,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 public void onEventDeleted() {
                                     Toast.makeText(MainActivity.this, "Событие удалено", Toast.LENGTH_SHORT).show();
                                     dialog.dismiss();
+                                    // updateMarkers();
                                 }
 
                                 @Override
@@ -338,6 +351,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     @Override
                     public void onEventUpdate() {
                         Toast.makeText(MainActivity.this, "Событие обновлено", Toast.LENGTH_SHORT).show();
+                        // updateMarkers();
                     }
 
                     @Override
@@ -349,5 +363,35 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void updateMarkers() {
+        eventManager.getAllEvents(new EventManager.OnEventsLoadedListener() {
+            @Override
+            public void onEventsLoaded(List<Event> eventList) {
+                mMap.clear();
+
+                for (Event event : eventList) {
+                    Marker marker = markerManager.addMarkerWithPriority(new LatLng(event.getLatitude(), event.getLongitude()),
+                            event.getTitle(), event.getPriority());
+
+                    marker.setTag(event);
+                }
+            }
+
+            @Override
+            public void onDataLoadFailed(Exception e) {
+                Toast.makeText(MainActivity.this, "Ошибка при загрузке событий", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+        mMap.setOnMarkerClickListener(marker -> {
+            Event event = (Event) marker.getTag();
+
+            if (event != null) {
+                showEventDetailsDialog(event);
+            }
+            return true;
+        });
     }
 }

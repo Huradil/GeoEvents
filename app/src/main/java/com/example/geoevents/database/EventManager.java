@@ -1,9 +1,11 @@
 package com.example.geoevents.database;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -74,6 +76,44 @@ public class EventManager {
         });
     }
 
+    public void subscribeToEventChanges(OnEventsUpdateListener listener) {
+        eventsRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                Event event = snapshot.getValue(Event.class);
+                if (event != null) {
+                    event.setId(snapshot.getKey());
+                    listener.onMarkersUpdate();
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                Event event = snapshot.getValue(Event.class);
+                if (event != null) {
+                    event.setId(snapshot.getKey());
+                    listener.onMarkersUpdate();
+                }
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                String eventId = snapshot.getKey();
+                listener.onMarkersUpdate();
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                //
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                listener.onDatabaseLoadFailed(error.toException());
+            }
+        });
+    }
+
     public interface OnEventAddedListener {
         void onEventAdded(Event event);
         void onEventAddFailed();
@@ -90,5 +130,9 @@ public class EventManager {
     public interface OnEventDeletedListener {
         void onEventDeleted();
         void onEventDeletedFailed(Exception e);
+    }
+    public interface OnEventsUpdateListener {
+        void onMarkersUpdate();
+        void onDatabaseLoadFailed(Exception e);
     }
 }
