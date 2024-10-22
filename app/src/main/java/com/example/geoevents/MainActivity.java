@@ -3,6 +3,7 @@ package com.example.geoevents;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -13,6 +14,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -59,11 +62,34 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mAuth = FirebaseAuth.getInstance();
         eventManager = new EventManager();
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_event_list) {
+            Intent intent = new Intent(this, EventListActivity.class);
+            startActivity(intent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -124,6 +150,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+
+        // обработка intent
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("eventLat") && intent.hasExtra("eventLng")) {
+            double eventLat = intent.getDoubleExtra("eventLat", 0);
+            double eventLng = intent.getDoubleExtra("eventLng", 0);
+            LatLng eventLocation = new LatLng(eventLat, eventLng);
+            moveToEventLocation(eventLocation);
+        }
+    }
+
+
+    private void moveToEventLocation(LatLng eventLocation) {
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(eventLocation, 15));
     }
 
     private void getCurrentLocation() {
