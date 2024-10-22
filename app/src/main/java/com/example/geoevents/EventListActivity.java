@@ -35,6 +35,7 @@ public class EventListActivity extends AppCompatActivity {
     private EventManager eventManager;
     private SearchView searchView;
     private Spinner spinnerPriority;
+    private Spinner spinnerCategory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +48,7 @@ public class EventListActivity extends AppCompatActivity {
         recyclerView.setAdapter(eventAdapter);
         searchView = findViewById(R.id.searchView);
         spinnerPriority = findViewById(R.id.spinnerPriority);
+        spinnerCategory = findViewById(R.id.spinnerCategory);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getCurrentLocation();
 
@@ -58,6 +60,7 @@ public class EventListActivity extends AppCompatActivity {
 
         setupSearch();
         setupPriorityFilter();
+        setupCategoryFilter();
     }
 
     private void loadEvents() {
@@ -66,7 +69,8 @@ public class EventListActivity extends AppCompatActivity {
             public void onEventsLoaded(List<Event> eventList) {
                 events.clear();
                 events.addAll(eventList);  // обновляем список событий
-                filterEvents(searchView.getQuery().toString(), spinnerPriority.getSelectedItem().toString()); // обновляем фильтрацию
+                filterEvents(searchView.getQuery().toString(), spinnerPriority.getSelectedItem().toString(),
+                        spinnerCategory.getSelectedItem().toString()); // обновляем фильтрацию
             }
 
             @Override
@@ -80,13 +84,13 @@ public class EventListActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                filterEvents(query, spinnerPriority.getSelectedItem().toString());
+                filterEvents(query, spinnerPriority.getSelectedItem().toString(), spinnerCategory.getSelectedItem().toString());
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                filterEvents(newText, spinnerPriority.getSelectedItem().toString());
+                filterEvents(newText, spinnerPriority.getSelectedItem().toString(), spinnerCategory.getSelectedItem().toString());
                 return true;
             }
         });
@@ -97,7 +101,8 @@ public class EventListActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String priority = parent.getItemAtPosition(position).toString();
-                filterEvents(searchView.getQuery().toString(), priority);
+                String category = spinnerCategory.getSelectedItem().toString();
+                filterEvents(searchView.getQuery().toString(), priority, category);
             }
 
             @Override
@@ -107,7 +112,24 @@ public class EventListActivity extends AppCompatActivity {
         });
     }
 
-    private void filterEvents(String query, String priority) {
+    private void setupCategoryFilter() {
+        spinnerCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String category = parent.getItemAtPosition(position).toString();
+                String priority = spinnerPriority.getSelectedItem().toString();
+                filterEvents(searchView.getQuery().toString(), priority, category);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Не требуется действие
+            }
+        });
+    }
+
+
+    private void filterEvents(String query, String priority, String category) {
         List<Event> filteredList = new ArrayList<>();
 
         for (Event event : events) {
@@ -116,7 +138,14 @@ public class EventListActivity extends AppCompatActivity {
 
             boolean matchesPriority = priority.equals("Все") || event.getPriority().equalsIgnoreCase(priority);
 
-            if (matchesText && matchesPriority) {
+            boolean matchesCategory;
+            if (event.getCategory() == null || event.getCategory().isEmpty() ) {
+                matchesCategory = false;
+            } else {
+                matchesCategory = category.equals("Все") || event.getCategory().equalsIgnoreCase(category);
+            }
+
+            if (matchesText && matchesPriority && matchesCategory) {
                 filteredList.add(event);
             }
         }

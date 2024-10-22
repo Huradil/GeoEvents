@@ -115,9 +115,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 for (Event event : eventList) {
                     LatLng eventLocation = new LatLng(event.getLatitude(), event.getLongitude());
                     String title = event.getTitle();
+                    String category = event.getCategory();
                     String priority = event.getPriority();
 
-                    Marker marker = markerManager.addMarkerWithPriority(eventLocation, title, priority);
+                    Marker marker = markerManager.addMarkerWithCategory(eventLocation, title, category, priority);
 
                     marker.setTag(event);
 
@@ -285,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Toast.makeText(MainActivity.this, "Событие добавлено", Toast.LENGTH_SHORT).show();
 
                     //mMap.addMarker(new MarkerOptions().position(latLng).title(event.getTitle()));
-                    markerManager.addMarkerWithPriority(latLng, event.getTitle(), event.getPriority() );
+                    markerManager.addMarkerWithCategory(latLng, event.getTitle(), event.getCategory(), event.getPriority() );
                 }
 
                 @Override
@@ -330,6 +331,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         EditText eventDescription = dialogView.findViewById(R.id.eventDescription);
         Spinner spinnerPriority = dialogView.findViewById(R.id.eventPriority);
+        Spinner spinnerCategory = dialogView.findViewById(R.id.eventCategory);
         EditText eventDateTime = dialogView.findViewById(R.id.eventDateTime);
         EditText eventEndDateTime = dialogView.findViewById(R.id.eventEndDateTime);
         Button btnDeleteEvent = dialogView.findViewById(R.id.btnDeleteEvent);
@@ -345,6 +347,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         spinnerPriority.setAdapter(adapter);
         int priorityPosition = adapter.getPosition(event.getPriority());
         spinnerPriority.setSelection(priorityPosition);
+
+        ArrayAdapter<CharSequence> adapter1 = ArrayAdapter.createFromResource(this, R.array.event_categories,
+                androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
+        adapter1.setDropDownViewResource(androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
+        spinnerCategory.setAdapter(adapter1);
+        int categoryPosition = adapter1.getPosition(event.getCategory());
+        spinnerCategory.setSelection(categoryPosition);
 
         if (!event.getAuthorId().equals(currentUserId)) {
             eventDescription.setEnabled(false);
@@ -382,12 +391,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String newPriority = spinnerPriority.getSelectedItem().toString();
                 String newStartDateTime = eventDateTime.getText().toString();
                 String newEndDateTime = eventEndDateTime.getText().toString();
+                String newCategory = spinnerCategory.getSelectedItem().toString();
 
                 event.setDescription(newDescription);
                 event.setPriority(newPriority);
                 event.setDate(newStartDateTime.split(" ")[0]);
                 event.setTime(newStartDateTime.split(" ")[1]);
                 event.setEndDateTime(newEndDateTime);
+                event.setCategory(newCategory);
 
                 eventManager.updateEvent(event, new EventManager.OnEventUpdateListener() {
                     @Override
@@ -414,8 +425,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mMap.clear();
 
                 for (Event event : eventList) {
-                    Marker marker = markerManager.addMarkerWithPriority(new LatLng(event.getLatitude(), event.getLongitude()),
-                            event.getTitle(), event.getPriority());
+                    Marker marker = markerManager.addMarkerWithCategory(new LatLng(event.getLatitude(), event.getLongitude()),
+                            event.getTitle(), event.getCategory(), event.getPriority());
 
                     marker.setTag(event);
                 }

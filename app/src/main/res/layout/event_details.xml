@@ -30,6 +30,12 @@
         android:layout_height="wrap_content"
         android:hint="Выберите дату и время окончания" />
 
+    <Spinner
+        android:id="@+id/eventCategory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/event_categories"/>
+
     <!-- Кнопки для удаления и сохранения изменений -->
     <LinearLayout
         android:layout_width="match_parent"

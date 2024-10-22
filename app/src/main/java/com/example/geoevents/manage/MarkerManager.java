@@ -34,6 +34,19 @@ public class MarkerManager {
         );
     }
 
+    public Marker addMarkerWithCategory(LatLng latLng, String title, String category, String priority) {
+        if (category == null || category.isEmpty()){
+            return addMarkerWithPriority(latLng, title, priority);
+        }
+        BitmapDescriptor icon = getMarkerIconByCategory(category);
+
+        return mMap.addMarker(new MarkerOptions()
+                .position(latLng)
+                .title(title)
+                .icon(icon)
+        );
+    }
+
     private BitmapDescriptor getMarkerIconByPriority(String priority) {
         int drawableId;
 
@@ -46,6 +59,33 @@ public class MarkerManager {
                 break;
             case "Низкий":
                 drawableId = R.drawable.low_marker;
+                break;
+            default:
+                return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
+        }
+
+        // Получение ресурсов через контекст
+        Drawable vectorDrawable = VectorDrawableCompat.create(mContext.getResources(), drawableId, null);
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        vectorDrawable.draw(canvas);
+
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
+    private BitmapDescriptor getMarkerIconByCategory(String category) {
+        int drawableId;
+
+        switch (category) {
+            case "Дорожное происшествие":
+                drawableId = R.drawable.car_warning;
+                break;
+            case "Мероприятие":
+                drawableId = R.drawable.event_ic;
+                break;
+            case "Заметка":
+                drawableId = R.drawable.note_ic;
                 break;
             default:
                 return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);

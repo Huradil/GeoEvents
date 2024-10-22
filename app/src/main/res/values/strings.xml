@@ -10,4 +10,16 @@
         <item>Мероприятие</item>
         <item>Заметка</item>
     </string-array>
+    <string-array name="event_priorities_filter">
+        <item>Низкий</item>
+        <item>Средний</item>
+        <item>Высокий</item>
+        <item>Все</item>
+    </string-array>
+    <string-array name="event_categories_filter">
+        <item>Дорожное происшествие</item>
+        <item>Мероприятие</item>
+        <item>Заметка</item>
+        <item>Все</item>
+    </string-array>
 </resources>
