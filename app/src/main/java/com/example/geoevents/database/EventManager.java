@@ -22,12 +22,12 @@ public class EventManager {
     }
 
     public void addEvent(String title, String description, LatLng latLng, String priority,
-                         String date, String time, String endDatetime,
+                         String date, String time, String endDatetime, String category,
                          OnEventAddedListener listener) {
         String eventId = eventsRef.push().getKey();
         String authorId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         Event event = new Event(eventId, title, description, latLng.latitude, latLng.longitude, priority,
-                date, time, endDatetime, authorId);
+                date, time, endDatetime, authorId, category);
 
         eventsRef.child(eventId).setValue(event).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {

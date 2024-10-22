@@ -225,6 +225,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         EditText dateInput = view.findViewById(R.id.eventDate);
         EditText timeInput = view.findViewById(R.id.eventTime);
         EditText endDateTimeInput = view.findViewById(R.id.eventEndDateTime);
+        Spinner categorySpinner = view.findViewById(R.id.eventCategory);
 
         // current date and time
         Calendar calendar = Calendar.getInstance();
@@ -272,12 +273,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             String title = titleInput.getText().toString();
             String description = descriptionInput.getText().toString();
             String selectedPriority = prioritySpinner.getSelectedItem().toString();
+            String selectedCategory = categorySpinner.getSelectedItem().toString();
             String eventDate = dateInput.getText().toString();
             String eventTime = timeInput.getText().toString();
             String endDateTime = endDateTimeInput.getText().toString();
 
             eventManager.addEvent(title, description, latLng, selectedPriority, eventDate,
-                    eventTime, endDateTime, new EventManager.OnEventAddedListener() {
+                    eventTime, endDateTime,selectedCategory, new EventManager.OnEventAddedListener() {
                 @Override
                 public void onEventAdded(Event event) {
                     Toast.makeText(MainActivity.this, "Событие добавлено", Toast.LENGTH_SHORT).show();
